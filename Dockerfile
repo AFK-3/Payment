@@ -11,6 +11,6 @@ ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 
 WORKDIR /app
 RUN ls -al
-COPY ./payment-0.0.1-SNAPSHOT.jar /app
+COPY ./Payment-0.0.1-SNAPSHOT.jar /app
 EXPOSE 8080
-CMD ["java","-jar","payment-0.0.1-SNAPSHOT.jar"]
+CMD ["java","-jar","Payment-0.0.1-SNAPSHOT.jar"]
