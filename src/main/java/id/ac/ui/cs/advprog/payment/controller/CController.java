@@ -5,7 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/ti")
 public class CController {
     String createHTML = "userCreate";
     @GetMapping("/")
