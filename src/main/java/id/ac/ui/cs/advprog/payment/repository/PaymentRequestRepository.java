@@ -4,11 +4,13 @@ import id.ac.ui.cs.advprog.payment.model.Builder.PaymentRequestBuilder;
 import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
 import id.ac.ui.cs.advprog.payment.service.PaymentRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Repository
 public class PaymentRequestRepository {
     @Autowired
     private PaymentRequestBuilder paymentRequestBuilder;
@@ -21,14 +23,14 @@ public class PaymentRequestRepository {
                 PaymentRequest newPaymentRequest = paymentRequestBuilder.reset()
                         .setCurrent(paymentRequest)
                         .addPaymentAmount(paymentRequest.getPaymentAmount())
-                        .addBuyerID(paymentRequest.getBuyerID()).build();
+                        .addBuyerUsername(paymentRequest.getBuyerUsername()).build();
                 paymentRequestList.set(index, newPaymentRequest);
                 return newPaymentRequest;
             }
         }
         PaymentRequest newPaymentRequest = paymentRequestBuilder.reset()
                 .addPaymentAmount(paymentRequest.getPaymentAmount())
-                .addBuyerID(paymentRequest.getBuyerID()).build();
+                .addBuyerUsername(paymentRequest.getBuyerUsername()).build();
         paymentRequestList.add(newPaymentRequest);
         return newPaymentRequest;
     }
@@ -47,10 +49,10 @@ public class PaymentRequestRepository {
         return paymentRequestList;
     }
 
-    public List<PaymentRequest> findAllByBuyerId(UUID buyerId) {
+    public List<PaymentRequest> findAllByBuyerUsername(String buyerUsername) {
         List<PaymentRequest> tempPaymentRequestList = new ArrayList<>();
         for (PaymentRequest paymentRequest : paymentRequestList) {
-            if (paymentRequest.getBuyerID().equals(buyerId)) {
+            if (paymentRequest != null && paymentRequest.getBuyerUsername().equals(buyerUsername)) {
                 tempPaymentRequestList.add(paymentRequest);
             }
         }
@@ -60,7 +62,7 @@ public class PaymentRequestRepository {
     public PaymentRequest deleteById(UUID id) {
         for (int index = 0; index < paymentRequestList.size(); index++) {
             PaymentRequest currentPaymentRequest = paymentRequestList.get(index);
-            if (currentPaymentRequest.getId().equals(id)) {
+            if (currentPaymentRequest != null && currentPaymentRequest.getId().equals(id)) {
                 paymentRequestList.remove(index);
                 return currentPaymentRequest;
             }

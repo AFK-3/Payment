@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentRequestImpl implements PaymentRequestService {
+    @Autowired
     private PaymentRequestRepository paymentRequestRepository;
 
     @Override
@@ -28,8 +29,8 @@ public class PaymentRequestImpl implements PaymentRequestService {
     }
 
     @Override
-    public List<PaymentRequest> findAllByBuyerId(UUID buyerId) {
-        return paymentRequestRepository.findAllByBuyerId(buyerId);
+    public List<PaymentRequest> findAllByBuyerUsername(String buyerUsername) {
+        return paymentRequestRepository.findAllByBuyerUsername(buyerUsername);
     }
 
     public PaymentRequest update(PaymentRequest paymentRequest) {

@@ -12,5 +12,5 @@ public class PaymentRequest {
     private int paymentAmount;
     private Long paymentRequestTime;
     private Long paymentResponseTime;
-    private UUID buyerID;
+    private String buyerUsername;
 }
