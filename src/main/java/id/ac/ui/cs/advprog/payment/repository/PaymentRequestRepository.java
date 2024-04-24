@@ -52,7 +52,7 @@ public class PaymentRequestRepository {
     public List<PaymentRequest> findAllByBuyerId(UUID buyerId) {
         List<PaymentRequest> tempPaymentRequestList = new ArrayList<>();
         for (PaymentRequest paymentRequest : paymentRequestList) {
-            if (paymentRequest.getBuyerID().equals(buyerId)) {
+            if (paymentRequest != null && paymentRequest.getBuyerID().equals(buyerId)) {
                 tempPaymentRequestList.add(paymentRequest);
             }
         }
@@ -62,7 +62,7 @@ public class PaymentRequestRepository {
     public PaymentRequest deleteById(UUID id) {
         for (int index = 0; index < paymentRequestList.size(); index++) {
             PaymentRequest currentPaymentRequest = paymentRequestList.get(index);
-            if (currentPaymentRequest.getId().equals(id)) {
+            if (currentPaymentRequest != null && currentPaymentRequest.getId().equals(id)) {
                 paymentRequestList.remove(index);
                 return currentPaymentRequest;
             }
