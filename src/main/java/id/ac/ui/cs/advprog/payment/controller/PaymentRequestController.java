@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.payment.model.Enum.PaymentRequestStatus;
 import id.ac.ui.cs.advprog.payment.service.PaymentRequestService;
 import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
+import id.ac.ui.cs.advprog.payment.middleware.AuthMiddleware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +29,15 @@ public class PaymentRequestController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createPaymentRequest(@RequestBody PaymentRequest paymentRequest) {
+    public ResponseEntity<String> createPaymentRequest(@RequestBody PaymentRequest paymentRequest,
+                                                       @RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || !buyerRole.equals("BUYER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        paymentRequest.setBuyerUsername(buyerUsername);
         paymentRequest = paymentRequestService.create(paymentRequest);
 
         String paymentRequestJson = null;
@@ -41,7 +51,7 @@ public class PaymentRequestController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<String> getAllPaymentRequest() {
+    public ResponseEntity<String> getAllPaymentRequest(Model model) {
         List<PaymentRequest> paymentRequestList = paymentRequestService.findAll();
 
         String paymentsRequestJson = null;
@@ -54,9 +64,9 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
-    @GetMapping("/get-all-by-buyer-id/{buyerID}")
-    public ResponseEntity<String> getAllPaymentRequestByBuyerId(@PathVariable UUID buyerID) {
-        List<PaymentRequest> paymentRequestList = paymentRequestService.findAllByBuyerId(buyerID);
+    @GetMapping("/get-all-by-buyer-username/{buyerUsername}")
+    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@PathVariable String buyerUsername) {
+        List<PaymentRequest> paymentRequestList = paymentRequestService.findAllByBuyerUsername(buyerUsername);
 
         String paymentsRequestJson = null;
         try {
@@ -83,7 +93,14 @@ public class PaymentRequestController {
     }
 
     @DeleteMapping("/delete-by-id/{id}")
-    public ResponseEntity<String> deletePaymentRequestById(@PathVariable UUID id) {
+    public ResponseEntity<String> deletePaymentRequestById(@PathVariable UUID id,
+                                                           @RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || !buyerRole.equals("BUYER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
         PaymentRequest deletedPaymentRequest = paymentRequestService.deletePaymentRequestById(id);
 
         String deletedPaymentRequestJson = null;
@@ -97,7 +114,14 @@ public class PaymentRequestController {
     }
 
     @PatchMapping("/cancel/{id}")
-    public ResponseEntity<String> cancelPaymentRequest(@PathVariable UUID id) {
+    public ResponseEntity<String> cancelPaymentRequest(@PathVariable UUID id,
+                                                       @RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || !buyerRole.equals("BUYER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
         PaymentRequest cancelledPaymentRequest = paymentRequestService.findById(id);
         cancelledPaymentRequest.setPaymentStatus(PaymentRequestStatus.CANCELLED.getStatus());
         paymentRequestService.update(cancelledPaymentRequest);

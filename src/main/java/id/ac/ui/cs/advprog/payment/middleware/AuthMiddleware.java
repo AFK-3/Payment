@@ -16,4 +16,13 @@ public class AuthMiddleware {
         return owner.getBody();
     }
 
+    public static String getRoleFromToken(String token) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", token);
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
+        ResponseEntity<String> owner = restTemplate.exchange("http://localhost:8081/user/get-role", HttpMethod.GET, entity, String.class);
+        return owner.getBody();
+    }
+
 }
