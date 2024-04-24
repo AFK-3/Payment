@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentRequestImpl implements PaymentRequestService {
+    @Autowired
     private PaymentRequestRepository paymentRequestRepository;
 
     @Override

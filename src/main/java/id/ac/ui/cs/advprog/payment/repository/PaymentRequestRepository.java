@@ -4,11 +4,13 @@ import id.ac.ui.cs.advprog.payment.model.Builder.PaymentRequestBuilder;
 import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
 import id.ac.ui.cs.advprog.payment.service.PaymentRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Repository
 public class PaymentRequestRepository {
     @Autowired
     private PaymentRequestBuilder paymentRequestBuilder;

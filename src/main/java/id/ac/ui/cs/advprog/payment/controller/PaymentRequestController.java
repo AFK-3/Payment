@@ -27,6 +27,7 @@ public class PaymentRequestController {
     @PostMapping("/create")
     public ResponseEntity<String> createPaymentRequest(@RequestBody PaymentRequest paymentRequest) {
         try {
+            paymentRequest = paymentRequestService.create(paymentRequest);
             String paymentRequestJson = objectMapper.writeValueAsString(paymentRequest);
             String responseJson = "{\"paymentRequest\":" + paymentRequestJson + "}";
             return ResponseEntity.ok(responseJson);
