@@ -12,7 +12,7 @@ public class AuthMiddleware {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
-        ResponseEntity<String> owner = restTemplate.exchange("http://localhost:8081/user/get-username", HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> owner = restTemplate.exchange("http://35.198.243.155/user/get-username", HttpMethod.GET, entity, String.class);
         return owner.getBody();
     }
 
@@ -21,7 +21,7 @@ public class AuthMiddleware {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
-        ResponseEntity<String> owner = restTemplate.exchange("http://localhost:8081/user/get-role", HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> owner = restTemplate.exchange("http://35.198.243.155/user/get-role", HttpMethod.GET, entity, String.class);
         return owner.getBody();
     }
 
