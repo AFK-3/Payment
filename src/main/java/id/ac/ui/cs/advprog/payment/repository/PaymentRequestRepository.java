@@ -23,14 +23,14 @@ public class PaymentRequestRepository {
                 PaymentRequest newPaymentRequest = paymentRequestBuilder.reset()
                         .setCurrent(paymentRequest)
                         .addPaymentAmount(paymentRequest.getPaymentAmount())
-                        .addBuyerID(paymentRequest.getBuyerID()).build();
+                        .addBuyerUsername(paymentRequest.getBuyerUsername()).build();
                 paymentRequestList.set(index, newPaymentRequest);
                 return newPaymentRequest;
             }
         }
         PaymentRequest newPaymentRequest = paymentRequestBuilder.reset()
                 .addPaymentAmount(paymentRequest.getPaymentAmount())
-                .addBuyerID(paymentRequest.getBuyerID()).build();
+                .addBuyerUsername(paymentRequest.getBuyerUsername()).build();
         paymentRequestList.add(newPaymentRequest);
         return newPaymentRequest;
     }
@@ -49,10 +49,10 @@ public class PaymentRequestRepository {
         return paymentRequestList;
     }
 
-    public List<PaymentRequest> findAllByBuyerId(UUID buyerId) {
+    public List<PaymentRequest> findAllByBuyerUsername(String buyerUsername) {
         List<PaymentRequest> tempPaymentRequestList = new ArrayList<>();
         for (PaymentRequest paymentRequest : paymentRequestList) {
-            if (paymentRequest != null && paymentRequest.getBuyerID().equals(buyerId)) {
+            if (paymentRequest != null && paymentRequest.getBuyerUsername().equals(buyerUsername)) {
                 tempPaymentRequestList.add(paymentRequest);
             }
         }

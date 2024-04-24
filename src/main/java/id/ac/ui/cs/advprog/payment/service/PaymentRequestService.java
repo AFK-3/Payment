@@ -11,7 +11,7 @@ public interface PaymentRequestService {
     public PaymentRequest create(PaymentRequest paymentRequest);
     public List<PaymentRequest> findAll();
     public PaymentRequest findById(UUID paymentRequestId);
-    public List<PaymentRequest> findAllByBuyerId(UUID buyerId);
+    public List<PaymentRequest> findAllByBuyerUsername(String buyerUsername);
     public PaymentRequest update(PaymentRequest paymentRequest);
     public PaymentRequest deletePaymentRequestById(UUID paymentRequestId);
 }
