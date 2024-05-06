@@ -104,6 +104,9 @@ public class PaymentRequestController {
         }
 
         PaymentRequest deletedPaymentRequest = paymentRequestService.deletePaymentRequestById(id);
+        if (deletedPaymentRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
 
         String deletedPaymentRequestJson = null;
         try {
@@ -127,6 +130,9 @@ public class PaymentRequestController {
 
         System.out.println("tembus");
         PaymentRequest cancelledPaymentRequest = paymentRequestService.findById(id);
+        if (cancelledPaymentRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
         cancelledPaymentRequest.setPaymentStatus(PaymentRequestStatus.CANCELLED.getStatus());
         paymentRequestService.update(cancelledPaymentRequest);
 
