@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
+@RestController
 @RequestMapping("/payment-request")
 public class PaymentRequestController {
     private PaymentRequestService paymentRequestService;
@@ -33,7 +34,8 @@ public class PaymentRequestController {
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        if (buyerUsername == null || !buyerRole.equals("BUYER")) {
+        System.out.println(buyerUsername+" "+buyerRole);
+        if (buyerUsername == null || buyerRole == null || !buyerRole.equals("BUYER")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
 
@@ -97,7 +99,7 @@ public class PaymentRequestController {
                                                            @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        if (buyerUsername == null || !buyerRole.equals("BUYER")) {
+        if (buyerUsername == null || buyerRole == null || !buyerRole.equals("BUYER")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
 
@@ -118,10 +120,12 @@ public class PaymentRequestController {
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        if (buyerUsername == null || !buyerRole.equals("BUYER")) {
+        System.out.println(buyerUsername+" (cancel) "+buyerRole);
+        if (buyerUsername == null || buyerRole == null || !buyerRole.equals("BUYER")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
 
+        System.out.println("tembus");
         PaymentRequest cancelledPaymentRequest = paymentRequestService.findById(id);
         cancelledPaymentRequest.setPaymentStatus(PaymentRequestStatus.CANCELLED.getStatus());
         paymentRequestService.update(cancelledPaymentRequest);
