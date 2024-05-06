@@ -34,9 +34,11 @@ public class PaymentRequestController {
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        System.out.println(buyerUsername+" "+buyerRole);
-        if (buyerUsername == null || buyerRole == null || !buyerRole.equals("BUYER")) {
+        if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("BUYER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
         paymentRequest.setBuyerUsername(buyerUsername);
@@ -99,8 +101,11 @@ public class PaymentRequestController {
                                                            @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        if (buyerUsername == null || buyerRole == null || !buyerRole.equals("BUYER")) {
+        if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("BUYER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
         PaymentRequest deletedPaymentRequest = paymentRequestService.deletePaymentRequestById(id);
@@ -120,12 +125,13 @@ public class PaymentRequestController {
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        System.out.println(buyerUsername+" (cancel) "+buyerRole);
-        if (buyerUsername == null || buyerRole == null || !buyerRole.equals("BUYER")) {
+        if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
+        if (! buyerRole.equals("BUYER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
+        }
 
-        System.out.println("tembus");
         PaymentRequest cancelledPaymentRequest = paymentRequestService.findById(id);
         cancelledPaymentRequest.setPaymentStatus(PaymentRequestStatus.CANCELLED.getStatus());
         paymentRequestService.update(cancelledPaymentRequest);
@@ -137,6 +143,45 @@ public class PaymentRequestController {
             throw new RuntimeException(e);
         }
         String responseJson = "{\"deletedPaymentsRequest\":" + cancelledPaymentRequestJson + "}";
+        return ResponseEntity.ok(responseJson);
+    }
+
+    @PatchMapping("/respond/{id}/{response}")
+    public ResponseEntity<String> respondPaymentRequest(@PathVariable UUID id,
+                                                       @PathVariable String response,
+                                                       @RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || buyerRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("STAFF")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Staff");
+        }
+
+        PaymentRequest respondedPaymentRequest = paymentRequestService.findById(id);
+        if (respondedPaymentRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
+        if (! response.equals("ACCEPT") && ! response.equals("REJECT")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Response must be ACCEPT or REJECT");
+        }
+
+        if (response.equals("ACCEPT"))
+            respondedPaymentRequest.setPaymentStatus(PaymentRequestStatus.ACCEPTED.getStatus());
+        else
+            respondedPaymentRequest.setPaymentStatus(PaymentRequestStatus.REJECTED.getStatus());
+
+        paymentRequestService.update(respondedPaymentRequest);
+
+        String respondedPaymentRequestJson = null;
+        try {
+            respondedPaymentRequestJson = objectMapper.writeValueAsString(respondedPaymentRequest);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        String responseJson = "{\"deletedPaymentsRequest\":" + respondedPaymentRequestJson + "}";
+
         return ResponseEntity.ok(responseJson);
     }
 
