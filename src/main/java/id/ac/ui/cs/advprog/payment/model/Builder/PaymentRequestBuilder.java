@@ -25,12 +25,12 @@ public class PaymentRequestBuilder {
     }
 
     public PaymentRequestBuilder firstSetUp() {
-        currentPaymentRequest.setId(UUID.randomUUID());
+        currentPaymentRequest.setId(UUID.randomUUID().toString());
         LocalTime now = LocalTime.now();
         Time orderTime = Time.valueOf(now);
         long orderTimeInLong = orderTime.getTime();
-        currentPaymentRequest.setPaymentStatus(PaymentRequestStatus.WAITING_RESPONSE.getStatus());
-        currentPaymentRequest.setPaymentRequestTime(orderTimeInLong);
+        this.addPaymentStatus(PaymentRequestStatus.WAITING_RESPONSE.getStatus());
+        this.addPaymentRequestTime(orderTimeInLong);
         return this;
     }
 
@@ -52,6 +52,18 @@ public class PaymentRequestBuilder {
         return this;
     }
 
+    public static void setPaymentResponseCurrentTime(PaymentRequest paymentRequest) {
+        LocalTime now = LocalTime.now();
+        Time orderTime = Time.valueOf(now);
+        long orderTimeInLong = orderTime.getTime();
+        paymentRequest.setPaymentResponseTime(orderTimeInLong);
+    }
+
+    public PaymentRequestBuilder addPaymentRequestTime(long paymentRequestTime) {
+        currentPaymentRequest.setPaymentRequestTime(paymentRequestTime);
+        return this;
+    }
+
     public PaymentRequestBuilder addBuyerUsername(String buyerUsername) {
         currentPaymentRequest.setBuyerUsername(buyerUsername);
         return this;
@@ -61,8 +73,11 @@ public class PaymentRequestBuilder {
         return currentPaymentRequest;
     }
 
-    public PaymentRequestBuilder setCurrent(PaymentRequest paymentRequest) {
-        currentPaymentRequest = paymentRequest;
-        return this;
+    public static void updateFields(PaymentRequest existing, PaymentRequest newData) {
+        existing.setPaymentStatus(newData.getPaymentStatus());
+        existing.setPaymentAmount(newData.getPaymentAmount());
+        existing.setPaymentRequestTime(newData.getPaymentRequestTime());
+        existing.setPaymentResponseTime(newData.getPaymentResponseTime());
+        existing.setBuyerUsername(newData.getBuyerUsername());
     }
 }
