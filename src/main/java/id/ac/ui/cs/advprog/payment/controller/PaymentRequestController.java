@@ -37,7 +37,6 @@ public class PaymentRequestController {
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        System.out.println(buyerUsername+" "+buyerRole);
         if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
@@ -133,7 +132,6 @@ public class PaymentRequestController {
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        System.out.println(buyerUsername+" (cancel) "+buyerRole);
         if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
@@ -141,7 +139,6 @@ public class PaymentRequestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
-        System.out.println("tembus");
         PaymentRequest cancelledPaymentRequest = paymentRequestService.findById(id);
         if (cancelledPaymentRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
