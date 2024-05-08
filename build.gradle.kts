@@ -40,14 +40,20 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
+    // JUnit 5 dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        // Exclude older JUnit versions if needed
+        exclude(module = "junit")
+    }
 }
 
 tasks.register<Test>("unitTest") {
     description = "Runs unit tests."
     group = "verification"
+
+    useJUnitPlatform() // Explicitly use JUnit Platform
 
     filter {
         excludeTestsMatching("*FunctionalTest")
@@ -57,6 +63,8 @@ tasks.register<Test>("unitTest") {
 tasks.register<Test>("functionalTest") {
     description = "Runs functional tests."
     group = "verification"
+
+    useJUnitPlatform() // Explicitly use JUnit Platform
 
     filter {
         includeTestsMatching("*FunctionalTest")
@@ -68,6 +76,8 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.test {
+    useJUnitPlatform() // Explicitly use JUnit Platform
+
     filter {
         excludeTestsMatching("*FunctionalTest")
     }
