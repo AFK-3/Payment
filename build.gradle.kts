@@ -11,6 +11,7 @@ sonar {
         property("sonar.projectKey", "AFK-3_Payment")
         property("sonar.organization", "afk-3")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.gradle.skipCompile", "true")
     }
 }
 
@@ -39,6 +40,8 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
