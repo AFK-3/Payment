@@ -5,6 +5,7 @@ import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface PaymentRequestService {
     public PaymentRequest create(PaymentRequest paymentRequest);
@@ -13,5 +14,5 @@ public interface PaymentRequestService {
     public List<PaymentRequest> findByUsername(String buyerUsername);
     public PaymentRequest update(PaymentRequest paymentRequest);
     public PaymentRequest deleteById(String id);
-    public List<PaymentRequest> deleteAll();
+    public CompletableFuture<List<PaymentRequest>> deleteAll();
 }

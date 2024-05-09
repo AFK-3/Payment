@@ -4,13 +4,16 @@ import id.ac.ui.cs.advprog.payment.model.Builder.PaymentRequestBuilder;
 import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
 import id.ac.ui.cs.advprog.payment.repository.PaymentRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
+@EnableAsync
 public class PaymentRequestImpl implements PaymentRequestService {
     @Autowired
     private PaymentRequestBuilder paymentRequestBuilder;
@@ -61,9 +64,12 @@ public class PaymentRequestImpl implements PaymentRequestService {
     }
 
     @Override
-    public List<PaymentRequest> deleteAll () {
-        List<PaymentRequest> allPaymentRequest = paymentRequestRepository.findAll();
-        paymentRequestRepository.deleteAll();
-        return allPaymentRequest;
+    @Async
+    public CompletableFuture<List<PaymentRequest>> deleteAll () {
+        return CompletableFuture.supplyAsync(() -> {
+            List<PaymentRequest> allPaymentRequest = paymentRequestRepository.findAll();
+            paymentRequestRepository.deleteAll();
+            return allPaymentRequest;
+        });
     }
 }

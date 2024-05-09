@@ -15,7 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RestController
@@ -99,7 +99,7 @@ public class PaymentRequestController {
         String responseJson = "{\"paymentsRequest\":" + paymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
-//
+
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<String> deletePaymentRequestById(@PathVariable String id,
                                                            @RequestHeader("Authorization") String token) {
@@ -125,6 +125,38 @@ public class PaymentRequestController {
         }
         String responseJson = "{\"deletedPaymentsRequest\":" + deletedPaymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
+    }
+
+    @DeleteMapping("/delete-all")
+    public CompletableFuture<ResponseEntity<String>> deleteAllPaymentRequest (@RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || buyerRole == null) {
+            return CompletableFuture.supplyAsync(() -> {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            });
+        }
+        if (! buyerRole.equals("STAFF")) {
+            return CompletableFuture.supplyAsync(() -> {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Staff");
+            });
+        }
+
+        return paymentRequestService.deleteAll()
+                .thenApply(paymentRequestList -> {
+                    if (paymentRequestList.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No Payment Request to be Deleted");
+                    }
+
+                    String deletedPaymentListJson = null;
+                    try {
+                        deletedPaymentListJson = objectMapper.writeValueAsString(paymentRequestList);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    String responseJson = "{\"deletedPaymentListRequest\":" + deletedPaymentListJson + "}";
+                    return ResponseEntity.ok(responseJson);
+                });
     }
 
     @PatchMapping("/cancel/{id}")
