@@ -11,7 +11,6 @@ sonar {
         property("sonar.projectKey", "AFK-3_Payment")
         property("sonar.organization", "afk-3")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.gradle.skipCompile", true)
     }
 }
 
@@ -40,20 +39,13 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
-    // JUnit 5 dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        // Exclude older JUnit versions if needed
-        exclude(module = "junit")
-    }
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2")
 }
 
 tasks.register<Test>("unitTest") {
     description = "Runs unit tests."
     group = "verification"
-
-    useJUnitPlatform() // Explicitly use JUnit Platform
 
     filter {
         excludeTestsMatching("*FunctionalTest")
@@ -63,8 +55,6 @@ tasks.register<Test>("unitTest") {
 tasks.register<Test>("functionalTest") {
     description = "Runs functional tests."
     group = "verification"
-
-    useJUnitPlatform() // Explicitly use JUnit Platform
 
     filter {
         includeTestsMatching("*FunctionalTest")
@@ -76,8 +66,6 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.test {
-    useJUnitPlatform() // Explicitly use JUnit Platform
-
     filter {
         excludeTestsMatching("*FunctionalTest")
     }
