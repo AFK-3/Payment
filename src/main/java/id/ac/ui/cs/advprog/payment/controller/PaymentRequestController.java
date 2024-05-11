@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
+import java.util.concurrent.CompletableFuture;
+import org.springframework.web.bind.annotation.CrossOrigin;
+@CrossOrigin(origins = "*")
 @Controller
 @RestController
 @RequestMapping("/payment-request")
