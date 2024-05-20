@@ -43,6 +43,12 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.h2database:h2")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
 }
 
 tasks.register<Test>("unitTest") {

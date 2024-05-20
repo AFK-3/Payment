@@ -9,52 +9,126 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
+@SpringBootTest
 public class PaymentRequestServiceTest {
-    @InjectMocks
-    PaymentRequestImpl paymentRequestImpl;
-
-    @Mock
-    PaymentRequestRepository paymentRequestRepository;
-
-    List<PaymentRequest> paymentRequests = new ArrayList<>();
 
     @Mock
     private PaymentRequestBuilder paymentRequestBuilder;
 
     @Mock
-    private RestTemplate restTemplate;
+    private PaymentRequestRepository paymentRequestRepository;
+
+    @InjectMocks
+    private PaymentRequestImpl paymentRequestService;
+
+    private PaymentRequest paymentRequest;
 
     @BeforeEach
     void setUp() {
-        PaymentRequest paymentRequest1 = paymentRequestBuilder.reset()
-                .addPaymentAmount(10)
-                .addBuyerUsername("aku")
-                .build();
+        paymentRequest = new PaymentRequest();
+        paymentRequest.setId("1");
+        paymentRequest.setPaymentAmount(100);
+        paymentRequest.setBuyerUsername("testUser");
+    }
 
-        PaymentRequest paymentRequest2 = paymentRequestBuilder.reset()
-                .addPaymentAmount(96)
-                .addBuyerUsername("adi")
-                .build();
+    @Test
+    void testCreate() {
+        when(paymentRequestBuilder.reset()).thenReturn(paymentRequestBuilder);
+        when(paymentRequestBuilder.addPaymentAmount(anyInt())).thenReturn(paymentRequestBuilder);
+        when(paymentRequestBuilder.addBuyerUsername(any(String.class))).thenReturn(paymentRequestBuilder);
+        when(paymentRequestBuilder.build()).thenReturn(paymentRequest);
+        when(paymentRequestRepository.save(any(PaymentRequest.class))).thenReturn(paymentRequest);
 
-        PaymentRequest paymentRequest3 = paymentRequestBuilder.reset()
-                .addPaymentAmount(34)
-                .addBuyerUsername("aku")
-                .build();
+        PaymentRequest createdPaymentRequest = paymentRequestService.create(paymentRequest);
 
-        paymentRequests.add(paymentRequest1);
-        paymentRequests.add(paymentRequest2);
-        paymentRequests.add(paymentRequest3);
+        assertNotNull(createdPaymentRequest);
+        assertEquals("testUser", createdPaymentRequest.getBuyerUsername());
+        verify(paymentRequestRepository, times(1)).save(paymentRequest);
+    }
+
+    @Test
+    void testFindAll() {
+        List<PaymentRequest> paymentRequests = Arrays.asList(paymentRequest);
+        when(paymentRequestRepository.findAll()).thenReturn(paymentRequests);
+
+        List<PaymentRequest> result = paymentRequestService.findAll();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(paymentRequestRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testFindById() {
+        when(paymentRequestRepository.findById("1")).thenReturn(Optional.of(paymentRequest));
+
+        PaymentRequest result = paymentRequestService.findById("1");
+
+        assertNotNull(result);
+        assertEquals("testUser", result.getBuyerUsername());
+        verify(paymentRequestRepository, times(1)).findById("1");
+    }
+
+    @Test
+    void testFindByUsername() {
+        List<PaymentRequest> paymentRequests = Arrays.asList(paymentRequest);
+        when(paymentRequestRepository.findByBuyerUsername("testUser")).thenReturn(paymentRequests);
+
+        List<PaymentRequest> result = paymentRequestService.findByUsername("testUser");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(paymentRequestRepository, times(1)).findByBuyerUsername("testUser");
+    }
+
+    @Test
+    void testUpdate() {
+        when(paymentRequestRepository.findById("1")).thenReturn(Optional.of(paymentRequest));
+        when(paymentRequestRepository.save(paymentRequest)).thenReturn(paymentRequest);
+
+        PaymentRequest updatedPaymentRequest = paymentRequestService.update(paymentRequest);
+
+        assertNotNull(updatedPaymentRequest);
+        assertEquals("testUser", updatedPaymentRequest.getBuyerUsername());
+        verify(paymentRequestRepository, times(1)).findById("1");
+        verify(paymentRequestRepository, times(1)).save(paymentRequest);
+    }
+
+    @Test
+    void testDeleteById() {
+        when(paymentRequestRepository.findById("1")).thenReturn(Optional.of(paymentRequest));
+
+        PaymentRequest deletedPaymentRequest = paymentRequestService.deleteById("1");
+
+        assertNotNull(deletedPaymentRequest);
+        verify(paymentRequestRepository, times(1)).findById("1");
+        verify(paymentRequestRepository, times(1)).deleteById("1");
+    }
+
+    @Test
+    void testDeleteAll() throws ExecutionException, InterruptedException {
+        List<PaymentRequest> paymentRequests = Arrays.asList(paymentRequest);
+        when(paymentRequestRepository.findAll()).thenReturn(paymentRequests);
+
+        CompletableFuture<List<PaymentRequest>> future = paymentRequestService.deleteAll();
+        List<PaymentRequest> result = future.get();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(paymentRequestRepository, times(1)).findAll();
+        verify(paymentRequestRepository, times(1)).deleteAll();
     }
 }
