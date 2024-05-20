@@ -15,10 +15,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
+import java.util.concurrent.CompletableFuture;
 import java.util.Random;
 
+
+@CrossOrigin(origins = "*")
 @Controller
 @RestController
 @RequestMapping("/payment-request")
@@ -46,6 +50,7 @@ public class PaymentRequestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
+        System.out.println(paymentRequest);
         paymentRequest.setBuyerUsername(buyerUsername);
         paymentRequest = paymentRequestService.create(paymentRequest);
 
