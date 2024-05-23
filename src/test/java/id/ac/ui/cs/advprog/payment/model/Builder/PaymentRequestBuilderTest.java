@@ -4,6 +4,8 @@ import id.ac.ui.cs.advprog.payment.model.Enum.PaymentRequestStatus;
 import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.Time;
 import java.time.LocalTime;
@@ -11,6 +13,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@ActiveProfiles("test")
 public class PaymentRequestBuilderTest {
 
     private PaymentRequestBuilder builder;
