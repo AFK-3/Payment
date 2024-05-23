@@ -19,6 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.concurrent.CompletableFuture;
+import java.util.Random;
+
 
 @CrossOrigin(origins = "*")
 @Controller
@@ -231,4 +233,36 @@ public class PaymentRequestController {
 
         return ResponseEntity.ok(responseJson);
     }
+
+    @PostMapping("/seed")
+    public ResponseEntity<String> seedingPaymentRequest (@RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || buyerRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("STAFF")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Staff");
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            Random random = new Random();
+            int randomPaymentRequestAmount = random.nextInt(1000) + 1;
+            PaymentRequest paymentRequest = paymentRequestBuilder.reset()
+                    .addPaymentAmount(randomPaymentRequestAmount)
+                    .addBuyerUsername(buyerUsername)
+                    .build();
+            paymentRequest = paymentRequestService.create(paymentRequest);
+        }
+        String seededPaymentRequestJson = null;
+        try {
+            seededPaymentRequestJson = objectMapper.writeValueAsString("1000");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        String responseJson = "{\"createdPaymentsRequest\":" + seededPaymentRequestJson + "}";
+
+        return ResponseEntity.ok(responseJson);
+    }
+
 }
