@@ -165,7 +165,7 @@ public class PaymentRequestController {
                 });
     }
 
-    @PatchMapping("/cancel/{id}")
+    @PutMapping("/cancel/{id}")
     public ResponseEntity<String> cancelPaymentRequest(@PathVariable String id,
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
@@ -194,7 +194,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
-    @PatchMapping("/respond/{id}/{response}")
+    @PutMapping("/respond/{id}/{response}")
     public ResponseEntity<String> respondPaymentRequest(@PathVariable String id,
                                                         @PathVariable String response,
                                                         @RequestHeader("Authorization") String token) {
@@ -233,36 +233,4 @@ public class PaymentRequestController {
 
         return ResponseEntity.ok(responseJson);
     }
-
-    @PostMapping("/seed")
-    public ResponseEntity<String> seedingPaymentRequest (@RequestHeader("Authorization") String token) {
-        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
-        String buyerRole = AuthMiddleware.getRoleFromToken(token);
-        if (buyerUsername == null || buyerRole == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
-        if (! buyerRole.equals("STAFF")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Staff");
-        }
-
-        for (int i = 0; i < 1000; i++) {
-            Random random = new Random();
-            int randomPaymentRequestAmount = random.nextInt(1000) + 1;
-            PaymentRequest paymentRequest = paymentRequestBuilder.reset()
-                    .addPaymentAmount(randomPaymentRequestAmount)
-                    .addBuyerUsername(buyerUsername)
-                    .build();
-            paymentRequest = paymentRequestService.create(paymentRequest);
-        }
-        String seededPaymentRequestJson = null;
-        try {
-            seededPaymentRequestJson = objectMapper.writeValueAsString("1000");
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        String responseJson = "{\"createdPaymentsRequest\":" + seededPaymentRequestJson + "}";
-
-        return ResponseEntity.ok(responseJson);
-    }
-
 }
