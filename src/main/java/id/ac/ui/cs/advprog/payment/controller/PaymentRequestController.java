@@ -38,6 +38,7 @@ public class PaymentRequestController {
         this.objectMapper = objectMapper;
     }
 
+    @CrossOrigin(origins = "*")
     @PostMapping("/create")
     public ResponseEntity<String> createPaymentRequest(@RequestBody PaymentRequest paymentRequest,
                                                        @RequestHeader("Authorization") String token) {
@@ -64,6 +65,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/get-all")
     public ResponseEntity<String> getAllPaymentRequest(Model model) {
         List<PaymentRequest> paymentRequestList = paymentRequestService.findAll();
@@ -78,6 +80,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/get-all-by-buyer-username")
     public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
@@ -101,6 +104,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/get-one-by-id/{id}")
     public ResponseEntity<String> getPaymentRequestById(@PathVariable String id) {
         PaymentRequest paymentRequest = paymentRequestService.findById(id);
@@ -115,6 +119,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<String> deletePaymentRequestById(@PathVariable String id,
                                                            @RequestHeader("Authorization") String token) {
@@ -145,6 +150,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @DeleteMapping("/delete-all")
     public CompletableFuture<ResponseEntity<String>> deleteAllPaymentRequest (@RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
@@ -177,6 +183,7 @@ public class PaymentRequestController {
                 });
     }
 
+    @CrossOrigin(origins = "*")
     @PutMapping("/cancel/{id}")
     public ResponseEntity<String> cancelPaymentRequest(@PathVariable String id,
                                                        @RequestHeader("Authorization") String token) {
@@ -209,6 +216,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @PutMapping("/edit/{id}/{newAmount}")
     public ResponseEntity<String> editPaymentRequest(@PathVariable String id,
                                                        @PathVariable int newAmount,
@@ -242,6 +250,7 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
+    @CrossOrigin(origins = "*")
     @PutMapping("/respond/{id}/{response}")
     public ResponseEntity<String> respondPaymentRequest(@PathVariable String id,
                                                         @PathVariable String response,
