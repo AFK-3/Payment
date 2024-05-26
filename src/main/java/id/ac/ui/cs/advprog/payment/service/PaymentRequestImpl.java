@@ -3,6 +3,7 @@ package id.ac.ui.cs.advprog.payment.service;
 import id.ac.ui.cs.advprog.payment.model.Builder.PaymentRequestBuilder;
 import id.ac.ui.cs.advprog.payment.model.PaymentRequest;
 import id.ac.ui.cs.advprog.payment.repository.PaymentRequestRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -25,7 +26,7 @@ public class PaymentRequestImpl implements PaymentRequestService {
                 .addPaymentAmount(paymentRequest.getPaymentAmount())
                 .addBuyerUsername(paymentRequest.getBuyerUsername())
                 .build();
-        paymentRequestRepository.save(paymentRequest);
+        paymentRequest = paymentRequestRepository.save(paymentRequest);
 
         return paymentRequest;
     }
@@ -48,10 +49,10 @@ public class PaymentRequestImpl implements PaymentRequestService {
     }
 
     @Override
-    public PaymentRequest update (PaymentRequest paymentRequest) {
-        Optional<PaymentRequest> matchedPaymentRequestOpt = paymentRequestRepository.findById(paymentRequest.getId());
-        if (! matchedPaymentRequestOpt.isPresent()) return null;
-        PaymentRequest matchedPaymentRequest = matchedPaymentRequestOpt.get();
+    public PaymentRequest update(PaymentRequest paymentRequest) {
+        PaymentRequest matchedPaymentRequest = paymentRequestRepository.findById(paymentRequest.getId())
+                .orElseThrow(() -> new EntityNotFoundException("PaymentRequest not found with id: " + paymentRequest.getId()));
+
         PaymentRequestBuilder.updateFields(matchedPaymentRequest, paymentRequest);
         paymentRequestRepository.save(matchedPaymentRequest);
         return matchedPaymentRequest;
