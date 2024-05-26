@@ -78,8 +78,17 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
-    @GetMapping("/get-all-by-buyer-username/{buyerUsername}")
-    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@PathVariable String buyerUsername) {
+    @GetMapping("/get-all-by-buyer-username")
+    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || buyerRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("BUYER") && ! buyerRole.equals("BUYERSELLER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
+        }
+
         List<PaymentRequest> paymentRequestList = paymentRequestService.findByUsername(buyerUsername);
 
         String paymentsRequestJson = null;
