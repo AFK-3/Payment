@@ -36,8 +36,9 @@ public class PaymentRequestImpl implements PaymentRequestService {
     }
 
     @Override
-    public PaymentRequest findById (String id) {
-        return paymentRequestRepository.findById(id).isPresent() ? paymentRequestRepository.findById(id).get() : null;
+    public PaymentRequest findById(String id) {
+        Optional<PaymentRequest> paymentRequestOpt = paymentRequestRepository.findById(id);
+        return paymentRequestOpt.orElse(null);
     }
 
     @Override

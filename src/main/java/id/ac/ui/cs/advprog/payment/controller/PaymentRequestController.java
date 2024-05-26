@@ -19,6 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.concurrent.CompletableFuture;
+import java.util.Random;
+
 
 @CrossOrigin(origins = "*")
 @Controller
@@ -44,7 +46,7 @@ public class PaymentRequestController {
         if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
-        if (! buyerRole.equals("BUYER")) {
+        if (! buyerRole.equals("BUYER") && ! buyerRole.equals("BUYERSELLER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
@@ -76,8 +78,17 @@ public class PaymentRequestController {
         return ResponseEntity.ok(responseJson);
     }
 
-    @GetMapping("/get-all-by-buyer-username/{buyerUsername}")
-    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@PathVariable String buyerUsername) {
+    @GetMapping("/get-all-by-buyer-username")
+    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || buyerRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("BUYER") && ! buyerRole.equals("BUYERSELLER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
+        }
+
         List<PaymentRequest> paymentRequestList = paymentRequestService.findByUsername(buyerUsername);
 
         String paymentsRequestJson = null;
@@ -112,13 +123,16 @@ public class PaymentRequestController {
         if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
-        if (! buyerRole.equals("BUYER")) {
+        if (! buyerRole.equals("BUYER") && ! buyerRole.equals("BUYERSELLER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
         PaymentRequest deletedPaymentRequest = paymentRequestService.deleteById(id);
         if (deletedPaymentRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
+        if (! deletedPaymentRequest.getBuyerUsername().equals(buyerUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not own this Payment Request");
         }
 
         String deletedPaymentRequestJson = null;
@@ -163,7 +177,7 @@ public class PaymentRequestController {
                 });
     }
 
-    @PatchMapping("/cancel/{id}")
+    @PutMapping("/cancel/{id}")
     public ResponseEntity<String> cancelPaymentRequest(@PathVariable String id,
                                                        @RequestHeader("Authorization") String token) {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
@@ -171,13 +185,16 @@ public class PaymentRequestController {
         if (buyerUsername == null || buyerRole == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
-        if (! buyerRole.equals("BUYER")) {
+        if (! buyerRole.equals("BUYER") && ! buyerRole.equals("BUYERSELLER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
         }
 
         PaymentRequest cancelledPaymentRequest = paymentRequestService.findById(id);
         if (cancelledPaymentRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
+        if (! cancelledPaymentRequest.getBuyerUsername().equals(buyerUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not own this Payment Request");
         }
         cancelledPaymentRequest.setPaymentStatus(PaymentRequestStatus.CANCELLED.getStatus());
         paymentRequestService.update(cancelledPaymentRequest);
@@ -188,11 +205,44 @@ public class PaymentRequestController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        String responseJson = "{\"deletedPaymentsRequest\":" + cancelledPaymentRequestJson + "}";
+        String responseJson = "{\"canceledPaymentsRequest\":" + cancelledPaymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
 
-    @PatchMapping("/respond/{id}/{response}")
+    @PutMapping("/edit/{id}/{newAmount}")
+    public ResponseEntity<String> editPaymentRequest(@PathVariable String id,
+                                                       @PathVariable int newAmount,
+                                                       @RequestHeader("Authorization") String token) {
+        String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
+        String buyerRole = AuthMiddleware.getRoleFromToken(token);
+        if (buyerUsername == null || buyerRole == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        if (! buyerRole.equals("BUYER") && ! buyerRole.equals("BUYERSELLER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role must be Buyer");
+        }
+
+        PaymentRequest editedPaymentRequest = paymentRequestService.findById(id);
+        if (editedPaymentRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
+        if (! editedPaymentRequest.getBuyerUsername().equals(buyerUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not own this Payment Request");
+        }
+        editedPaymentRequest.setPaymentAmount(newAmount);
+        paymentRequestService.update(editedPaymentRequest);
+
+        String editedPaymentRequestJson = null;
+        try {
+            editedPaymentRequestJson = objectMapper.writeValueAsString(editedPaymentRequest);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        String responseJson = "{\"editedPaymentsRequest\":" + editedPaymentRequestJson + "}";
+        return ResponseEntity.ok(responseJson);
+    }
+
+    @PutMapping("/respond/{id}/{response}")
     public ResponseEntity<String> respondPaymentRequest(@PathVariable String id,
                                                         @PathVariable String response,
                                                         @RequestHeader("Authorization") String token) {
@@ -231,4 +281,6 @@ public class PaymentRequestController {
 
         return ResponseEntity.ok(responseJson);
     }
+
+
 }
