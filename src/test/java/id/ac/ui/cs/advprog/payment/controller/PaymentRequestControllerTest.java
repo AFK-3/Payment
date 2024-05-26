@@ -91,8 +91,10 @@ public class PaymentRequestControllerTest {
     public void testGetAllPaymentRequestsByBuyerUsername() throws Exception {
         List<PaymentRequest> paymentRequests = Collections.singletonList(paymentRequest);
         when(paymentRequestService.findByUsername("aku")).thenReturn(paymentRequests);
+        String token = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ";
 
-        mockMvc.perform(get("/payment-request/get-all-by-buyer-username/aku"))
+        mockMvc.perform(get("/payment-request/get-all-by-buyer-username")
+                .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"paymentsRequest\":[{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"WAITING_RESPONSE\",\"paymentAmount\":61,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}]}"));
     }
