@@ -92,7 +92,10 @@ jobs:
         run: export DOCKER_BUILDKIT=1
       - name: Build Docker Image
         run: |
+          IMAGE_TAG=${{ github.sha }}
           docker build --build-arg PRODUCTION=${{ secrets.PRODUCTION }} --build-arg JDBC_DATABASE_PASSWORD=${{ secrets.JDBC_DATABASE_PASSWORD }} --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME }} -t ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:${{ secrets.IMAGE_TAG }} .
+          docker tag ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:latest ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:$IMAGE_TAG
+          docker push ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:latest
           docker push ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:${{ secrets.IMAGE_TAG }}
 
   deploy:
@@ -113,7 +116,8 @@ jobs:
         run: chmod 400 ssh-key.pem
       - name: Deploy to GCP
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.GCP_USERNAME }}@${{ secrets.GCP_STATIC_IP }} "
-            sudo docker container rm -f ${{ secrets.CONTAINER_NAME }} || true &&
-            sudo docker image rm -f ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:${{ secrets.IMAGE_TAG }} || true &&
-            sudo docker run --name ${{ secrets.CONTAINER_NAME }} -d -p 80:8080 ${{ secrets.REGISTRY_USER }}/${{ secrets.IMAGE_NAME }}:${{ secrets.IMAGE_TAG }}"
+          scp -o StrictHostKeyChecking=no -i ssh-key.pem -r ./monitoring ./deploy.sh ./rollback.sh ./current_version.txt ${{ secrets.GCP_USERNAME }}@${{ secrets.GCP_STATIC_IP }}:~
+                    ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.GCP_USERNAME }}@${{ secrets.GCP_STATIC_IP }} "
+                      sudo chmod +x deploy.sh rollback.sh;
+                      sudo ./deploy.sh ${{ github.sha }} latest
+                    "
