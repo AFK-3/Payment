@@ -190,8 +190,15 @@ public class PaymentRequestController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        String responseJson = "{\"deletedPaymentsRequest\":" + cancelledPaymentRequestJson + "}";
+        String responseJson = "{\"canceledPaymentsRequest\":" + cancelledPaymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
+    }
+
+    @PutMapping("/edit/{id}/{newAmount}")
+    public ResponseEntity<String> editPaymentRequest(@PathVariable String id,
+                                                       @PathVariable int newAmount,
+                                                       @RequestHeader("Authorization") String token) {
+        return null;
     }
 
     @PutMapping("/respond/{id}/{response}")
@@ -233,4 +240,6 @@ public class PaymentRequestController {
 
         return ResponseEntity.ok(responseJson);
     }
+
+
 }
