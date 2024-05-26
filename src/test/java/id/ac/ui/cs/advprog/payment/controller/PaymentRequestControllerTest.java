@@ -130,7 +130,7 @@ public class PaymentRequestControllerTest {
         mockMvc.perform(put("/payment-request/cancel/7ac424ea-c319-4793-9346-c89b40dd2984")
                         .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"deletedPaymentsRequest\":{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"CANCELLED\",\"paymentAmount\":61,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}}"));
+                .andExpect(content().json("{\"canceledPaymentsRequest\":{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"CANCELLED\",\"paymentAmount\":61,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}}"));
     }
 
     @Test
@@ -141,6 +141,24 @@ public class PaymentRequestControllerTest {
         mockMvc.perform(put("/payment-request/respond/7ac424ea-c319-4793-9346-c89b40dd2984/ACCEPT")
                         .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3VTdGFmZiIsImlhdCI6MTcxNjQ1MDUyNiwiZXhwIjoxNzE2NDU0MTI2fQ.OjiTySqxlWWWmRYUYcmKhCU7mN78dsqyCTUbGEjYSUV8eGPbZGeUAwq025YTjUUWSBbAVJWb5k7nQ7CUXZskyA"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testEditPaymentRequest() throws Exception {
+        String token = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ";
+        int newAmount = 100;
+
+        when(paymentRequestService.findById("7ac424ea-c319-4793-9346-c89b40dd2984")).thenReturn(paymentRequest);
+        paymentRequest.setPaymentAmount(newAmount);
+        when(paymentRequestService.update(any(PaymentRequest.class))).thenReturn(paymentRequest);
+
+        String expectedJson = String.format("{\"editedPaymentsRequest\":{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"WAITING_RESPONSE\",\"paymentAmount\":%d,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}}", newAmount);
+
+        mockMvc.perform(put("/payment-request/edit/7ac424ea-c319-4793-9346-c89b40dd2984/" + newAmount)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
     }
 
     @Configuration
