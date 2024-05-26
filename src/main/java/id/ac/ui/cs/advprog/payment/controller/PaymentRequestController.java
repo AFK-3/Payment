@@ -41,7 +41,7 @@ public class PaymentRequestController {
     @CrossOrigin(origins = "*")
     @PostMapping("/create")
     public ResponseEntity<String> createPaymentRequest(@RequestBody PaymentRequest paymentRequest,
-                                                       @RequestHeader("Authorization") String token) {
+                                                       @RequestHeader("Authorization") String token) throws JsonProcessingException {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
         if (buyerUsername == null || buyerRole == null) {
@@ -56,33 +56,25 @@ public class PaymentRequestController {
         paymentRequest = paymentRequestService.create(paymentRequest);
 
         String paymentRequestJson = null;
-        try {
-            paymentRequestJson = objectMapper.writeValueAsString(paymentRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        paymentRequestJson = objectMapper.writeValueAsString(paymentRequest);
         String responseJson = "{\"paymentRequest\":" + paymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
 
     @CrossOrigin(origins = "*")
     @GetMapping("/get-all")
-    public ResponseEntity<String> getAllPaymentRequest(Model model) {
+    public ResponseEntity<String> getAllPaymentRequest(Model model) throws JsonProcessingException {
         List<PaymentRequest> paymentRequestList = paymentRequestService.findAll();
 
         String paymentsRequestJson = null;
-        try {
-            paymentsRequestJson = objectMapper.writeValueAsString(paymentRequestList);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        paymentsRequestJson = objectMapper.writeValueAsString(paymentRequestList);
         String responseJson = "{\"paymentsRequest\":" + paymentsRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
 
     @CrossOrigin(origins = "*")
     @GetMapping("/get-all-by-buyer-username")
-    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> getAllPaymentRequestByBuyerUsername(@RequestHeader("Authorization") String token) throws JsonProcessingException {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
         if (buyerUsername == null || buyerRole == null) {
@@ -95,11 +87,7 @@ public class PaymentRequestController {
         List<PaymentRequest> paymentRequestList = paymentRequestService.findByUsername(buyerUsername);
 
         String paymentsRequestJson = null;
-        try {
-            paymentsRequestJson = objectMapper.writeValueAsString(paymentRequestList);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        paymentsRequestJson = objectMapper.writeValueAsString(paymentRequestList);
         String responseJson = "{\"paymentsRequest\":" + paymentsRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
@@ -122,7 +110,7 @@ public class PaymentRequestController {
     @CrossOrigin(origins = "*")
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<String> deletePaymentRequestById(@PathVariable String id,
-                                                           @RequestHeader("Authorization") String token) {
+                                                           @RequestHeader("Authorization") String token) throws JsonProcessingException {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
         if (buyerUsername == null || buyerRole == null) {
@@ -141,11 +129,7 @@ public class PaymentRequestController {
         }
 
         String deletedPaymentRequestJson = null;
-        try {
-            deletedPaymentRequestJson = objectMapper.writeValueAsString(deletedPaymentRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        deletedPaymentRequestJson = objectMapper.writeValueAsString(deletedPaymentRequest);
         String responseJson = "{\"deletedPaymentsRequest\":" + deletedPaymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
@@ -186,7 +170,7 @@ public class PaymentRequestController {
     @CrossOrigin(origins = "*")
     @PutMapping("/cancel/{id}")
     public ResponseEntity<String> cancelPaymentRequest(@PathVariable String id,
-                                                       @RequestHeader("Authorization") String token) {
+                                                       @RequestHeader("Authorization") String token) throws JsonProcessingException {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
         if (buyerUsername == null || buyerRole == null) {
@@ -207,11 +191,7 @@ public class PaymentRequestController {
         paymentRequestService.update(cancelledPaymentRequest);
 
         String cancelledPaymentRequestJson = null;
-        try {
-            cancelledPaymentRequestJson = objectMapper.writeValueAsString(cancelledPaymentRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        cancelledPaymentRequestJson = objectMapper.writeValueAsString(cancelledPaymentRequest);
         String responseJson = "{\"canceledPaymentsRequest\":" + cancelledPaymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
@@ -220,7 +200,7 @@ public class PaymentRequestController {
     @PutMapping("/edit/{id}/{newAmount}")
     public ResponseEntity<String> editPaymentRequest(@PathVariable String id,
                                                        @PathVariable int newAmount,
-                                                       @RequestHeader("Authorization") String token) {
+                                                       @RequestHeader("Authorization") String token) throws JsonProcessingException {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
         if (buyerUsername == null || buyerRole == null) {
@@ -241,11 +221,7 @@ public class PaymentRequestController {
         paymentRequestService.update(editedPaymentRequest);
 
         String editedPaymentRequestJson = null;
-        try {
-            editedPaymentRequestJson = objectMapper.writeValueAsString(editedPaymentRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        editedPaymentRequestJson = objectMapper.writeValueAsString(editedPaymentRequest);
         String responseJson = "{\"editedPaymentsRequest\":" + editedPaymentRequestJson + "}";
         return ResponseEntity.ok(responseJson);
     }
@@ -254,7 +230,7 @@ public class PaymentRequestController {
     @PutMapping("/respond/{id}/{response}")
     public ResponseEntity<String> respondPaymentRequest(@PathVariable String id,
                                                         @PathVariable String response,
-                                                        @RequestHeader("Authorization") String token) {
+                                                        @RequestHeader("Authorization") String token) throws JsonProcessingException {
         String buyerUsername = AuthMiddleware.getUsernameFromToken(token);
         String buyerRole = AuthMiddleware.getRoleFromToken(token);
         if (buyerUsername == null || buyerRole == null) {
@@ -281,11 +257,7 @@ public class PaymentRequestController {
         paymentRequestService.update(respondedPaymentRequest);
 
         String respondedPaymentRequestJson = null;
-        try {
-            respondedPaymentRequestJson = objectMapper.writeValueAsString(respondedPaymentRequest);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        respondedPaymentRequestJson = objectMapper.writeValueAsString(respondedPaymentRequest);
         String responseJson = "{\"deletedPaymentsRequest\":" + respondedPaymentRequestJson + "}";
 
         return ResponseEntity.ok(responseJson);

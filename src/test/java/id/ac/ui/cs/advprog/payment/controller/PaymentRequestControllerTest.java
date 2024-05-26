@@ -17,9 +17,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 import java.sql.Time;
 import java.time.LocalTime;
@@ -54,8 +56,11 @@ public class PaymentRequestControllerTest {
 
     private PaymentRequest paymentRequest;
 
+    private String STAFF_TOKEN;
+    private String BUYER_TOKEN;
+
     @BeforeEach
-    public void setup() {
+    public void setup() throws Exception {
         paymentRequest = new PaymentRequest();
         paymentRequest.setId("7ac424ea-c319-4793-9346-c89b40dd2984");
         paymentRequest.setPaymentStatus("WAITING_RESPONSE");
@@ -63,6 +68,18 @@ public class PaymentRequestControllerTest {
         paymentRequest.setPaymentRequestTime(27325000L); // Corrected long literal
         paymentRequest.setPaymentResponseTime(null);
         paymentRequest.setBuyerUsername("aku");
+
+        RestTemplate restTemplate = new RestTemplate();
+        String loginUrl = "http://35.198.243.155/api/auth/login?username=akuStaff&password=pass";
+        ResponseEntity<String> response = restTemplate.postForEntity(loginUrl, null, String.class);
+        STAFF_TOKEN = "Bearer " + response.getBody();
+
+        restTemplate = new RestTemplate();
+        loginUrl = "http://35.198.243.155/api/auth/login?username=aku&password=pass";
+        response = restTemplate.postForEntity(loginUrl, null, String.class);
+        BUYER_TOKEN = "Bearer " + response.getBody();
+
+        when(paymentRequestService.deleteAll()).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(paymentRequest)));
     }
 
     @Test
@@ -70,7 +87,7 @@ public class PaymentRequestControllerTest {
         when(paymentRequestService.create(any(PaymentRequest.class))).thenReturn(paymentRequest);
 
         mockMvc.perform(post("/payment-request/create")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ")
+                        .header("Authorization", BUYER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"paymentAmount\":100}"))
                 .andExpect(status().isOk())
@@ -94,7 +111,7 @@ public class PaymentRequestControllerTest {
         String token = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ";
 
         mockMvc.perform(get("/payment-request/get-all-by-buyer-username")
-                .header("Authorization", token))
+                .header("Authorization", BUYER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"paymentsRequest\":[{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"WAITING_RESPONSE\",\"paymentAmount\":61,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}]}"));
     }
@@ -113,7 +130,7 @@ public class PaymentRequestControllerTest {
         when(paymentRequestService.deleteById("7ac424ea-c319-4793-9346-c89b40dd2984")).thenReturn(paymentRequest);
 
         mockMvc.perform(delete("/payment-request/delete-by-id/7ac424ea-c319-4793-9346-c89b40dd2984")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ"))
+                        .header("Authorization", BUYER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"deletedPaymentsRequest\":{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"WAITING_RESPONSE\",\"paymentAmount\":61,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}}"));
     }
@@ -121,7 +138,7 @@ public class PaymentRequestControllerTest {
     @Test
     public void testDeleteAllPaymentRequests() throws Exception {
         mockMvc.perform(delete("/payment-request/delete-all")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdGFmZiIsImlhdCI6MTcxNjQ0NzY1MiwiZXhwIjoxNzE2NDUxMjUyfQ.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ"))
+                        .header("Authorization", STAFF_TOKEN))
                 .andExpect(status().isOk());
     }
 
@@ -130,7 +147,7 @@ public class PaymentRequestControllerTest {
         when(paymentRequestService.findById("7ac424ea-c319-4793-9346-c89b40dd2984")).thenReturn(paymentRequest);
 
         mockMvc.perform(put("/payment-request/cancel/7ac424ea-c319-4793-9346-c89b40dd2984")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ"))
+                        .header("Authorization", BUYER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"canceledPaymentsRequest\":{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"CANCELLED\",\"paymentAmount\":61,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}}"));
     }
@@ -141,13 +158,12 @@ public class PaymentRequestControllerTest {
 
 
         mockMvc.perform(put("/payment-request/respond/7ac424ea-c319-4793-9346-c89b40dd2984/ACCEPT")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3VTdGFmZiIsImlhdCI6MTcxNjQ1MDUyNiwiZXhwIjoxNzE2NDU0MTI2fQ.OjiTySqxlWWWmRYUYcmKhCU7mN78dsqyCTUbGEjYSUV8eGPbZGeUAwq025YTjUUWSBbAVJWb5k7nQ7CUXZskyA"))
+                        .header("Authorization", STAFF_TOKEN))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testEditPaymentRequest() throws Exception {
-        String token = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJha3UiLCJpYXQiOjE3MTY0NDc2NTIsImV4cCI6MTcxNjQ1MTI1Mn0.ITlXCYR0blT-CAfpt5Jv7Nwr0mrchixeVvyY4QS9yyn9WWUKuWlgGQRDsww2YLyb81syblf5o02-Z9_Uu-SWdQ";
         int newAmount = 100;
 
         when(paymentRequestService.findById("7ac424ea-c319-4793-9346-c89b40dd2984")).thenReturn(paymentRequest);
@@ -157,7 +173,7 @@ public class PaymentRequestControllerTest {
         String expectedJson = String.format("{\"editedPaymentsRequest\":{\"id\":\"7ac424ea-c319-4793-9346-c89b40dd2984\",\"paymentStatus\":\"WAITING_RESPONSE\",\"paymentAmount\":%d,\"paymentRequestTime\":27325000,\"paymentResponseTime\":null,\"buyerUsername\":\"aku\"}}", newAmount);
 
         mockMvc.perform(put("/payment-request/edit/7ac424ea-c319-4793-9346-c89b40dd2984/" + newAmount)
-                        .header("Authorization", token)
+                        .header("Authorization", BUYER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));
