@@ -131,6 +131,9 @@ public class PaymentRequestController {
         if (deletedPaymentRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
         }
+        if (! deletedPaymentRequest.getBuyerUsername().equals(buyerUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not own this Payment Request");
+        }
 
         String deletedPaymentRequestJson = null;
         try {
@@ -190,6 +193,9 @@ public class PaymentRequestController {
         if (cancelledPaymentRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
         }
+        if (! cancelledPaymentRequest.getBuyerUsername().equals(buyerUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not own this Payment Request");
+        }
         cancelledPaymentRequest.setPaymentStatus(PaymentRequestStatus.CANCELLED.getStatus());
         paymentRequestService.update(cancelledPaymentRequest);
 
@@ -219,6 +225,9 @@ public class PaymentRequestController {
         PaymentRequest editedPaymentRequest = paymentRequestService.findById(id);
         if (editedPaymentRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID doesn't exist");
+        }
+        if (! editedPaymentRequest.getBuyerUsername().equals(buyerUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not own this Payment Request");
         }
         editedPaymentRequest.setPaymentAmount(newAmount);
         paymentRequestService.update(editedPaymentRequest);
